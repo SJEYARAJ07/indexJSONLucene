@@ -11,7 +11,7 @@
     - All code written in Java 13
     - All the Dependencies have been mentioned in the pom.xml
 
-# how it all fits together
+# How it all fits together
 
 1) Inputs to the program:
 
@@ -26,7 +26,7 @@
             - parseInputJsonFile
             - openLuceneIndex
             - addLuceneDocuments
-        - wrapupAndFinish
+            - wrapupAndFinish
       - wildcardSearchOnIndex
 
 # Sample Output of Program:
