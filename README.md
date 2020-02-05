@@ -4,8 +4,8 @@
 
 # Overview
 
-    It also providess a functionality to search for a indexed item. 
-
+    Crawler for gun violence generates the JSON files as inputs to this program. indexJSONLuncene package iterates thru each JSON file and creates the index. Functionality has been provided to do a wild card search query to validate if the index has been created using Lucene's queryparser. 
+    
 # Dependencies
 
     - All code written in Java 13
@@ -29,6 +29,13 @@
             - wrapupAndFinish
       - wildcardSearchOnIndex
 
+3)  Query Parser - Sample text on description key of JSON
+    
+    ```
+     //create a term to search file name
+            Term term = new Term("description", "*principalmente Pokémon*");
+    ```
+    
 # Sample Output of Program:
 
     ************************************************************************
