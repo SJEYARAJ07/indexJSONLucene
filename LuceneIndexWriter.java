@@ -4,6 +4,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -15,24 +16,20 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.io.*;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
-import java.io.File;
-//import static org.junit.Assert.assertEquals;
-import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path; 
 
 public class LuceneIndexWriter {
     
-    IndexWriter indexWriter = null;
+    private static final String String = null;
+	IndexWriter indexWriter = null;
     private String inputJsonFilePath;
-    private String outputLuceneIndexPath;
+    private static String outputLuceneIndexPath;
 
     //Constructor to initialize the file path
     public LuceneIndexWriter(String outputLuceneIndexPath, String inputJsonFilePath) {
@@ -41,7 +38,7 @@ public class LuceneIndexWriter {
     }
 
     //Create the Lucene Index
-    public  void createLuceneIndex(){
+    public  void createLuceneIndex() throws IOException {
         
     	JSONArray jsonObjects = parseInputJsonFile();
         
@@ -61,13 +58,10 @@ public class LuceneIndexWriter {
 			arrayObjects = (JSONArray) parser.parse(new FileReader(inputJsonFilePath));
 		} 
 		catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -78,9 +72,14 @@ public class LuceneIndexWriter {
     //Opening the Lucene Index and specify the IndexWriterConfig
     public boolean openLuceneIndex(){
         try {
-            Directory dir = FSDirectory.open(new File(outputLuceneIndexPath));
-            Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_48);
-            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_48, analyzer);
+        
+            Path indexPath = Paths.get(outputLuceneIndexPath);
+        	Directory dir = FSDirectory.open(indexPath);
+            Analyzer analyzer = new StandardAnalyzer();
+            
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
+            
+            System.out.println(indexPath);
 
             //IndexWriterConfig allows you specify the open mode:
             //Available 3 options:
@@ -101,35 +100,91 @@ public class LuceneIndexWriter {
     }
 
 //Add to Lucene documents
-    public void addLuceneDocuments(JSONArray jsonObjects){
-        for(JSONObject jsonList : (List<JSONObject>) jsonObjects){
-            Document document = new Document();
-            for(String field : (Set<String>) jsonList.keySet()){
-                Class type = jsonList.get(field).getClass();
+	public void addLuceneDocuments(JSONArray jsonObjects){
+    		
+
+   	    FieldType textIndexedTypeTrue = new FieldType();
+	    textIndexedTypeTrue.setStored(true);
+	    textIndexedTypeTrue.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
   
-                if(type.equals(String.class))
-                {
-                	document.add(new StringField(field, (String)jsonList.get(field), Field.Store.NO));
-                }
-                else if(type.equals(Long.class))
-                {
-                	document.add(new LongField(field, (long)jsonList.get(field), Field.Store.YES));
-                }
-                else if(type.equals(Double.class))
-                {
-                	document.add(new DoubleField(field, (double)jsonList.get(field), Field.Store.YES));
-                }
-                else if(type.equals(Boolean.class))
-                {
-                	document.add(new StringField(field, jsonList.get(field).toString(), Field.Store.YES));
-                }
-            }
-            try {
+        for (Object O: jsonObjects) {
+   
+            Document document = new Document();
+
+        	JSONObject news = (JSONObject) O;
+
+    		String section = "";
+    	    if (news.get("section") != null) {
+    	    	section = (String)news.get("section");    	   
+    	    }
+
+    	    String title = "";
+    	    if (news.get("title") != null) {
+    	    	title = (String)news.get("title");    	   
+    	    }
+
+    	    String description = "";
+    	    if (news.get("description") != null) {
+    	    	description = (String)news.get("description");    	   
+    	    }
+    	    
+    	    String name = "";
+    	    if (news.get("name") != null) {
+    	    	name = (String)news.get("name");    	   
+    	    }
+    	    
+    	    String created = "";
+    	    if (news.get("created") != null) {
+    	    	created = (String)news.get("created");    	   
+    	    }
+    	    
+    	    String imagelink = "";
+    	    if (news.get("image-link") != null) {
+    	    	imagelink = (String)news.get("image-link");    	   
+    	    }
+
+//    	    String images = "";
+//    	    if (news.get("images") != null) {
+//    	    	images = (String)news.get("images");    	   
+//    	    }
+
+    	    String loc = "";
+    	    if (news.get("loc") != null) {
+    	    	loc = (String)news.get("loc");    	   
+    	    }
+    	    
+    	    String text = "";
+    	    if (news.get("text") != null) {
+    	    	text = (String)news.get("text");    	   
+    	    }
+    	    
+    	    String quotedText = "";
+    	    if (news.get("quotedText") != null) {
+    	    	quotedText = (String)news.get("quotedText");    	   
+    	    }
+    	    
+    	    document.add(new StringField("section",section,Field.Store.YES));
+    	    document.add(new StringField("title",title,Field.Store.YES));	    
+    	    document.add(new StringField("description",description,Field.Store.YES));
+    	    document.add(new StringField("name",name,Field.Store.YES));
+//    	    document.add(new StringNoIndexedField("name",name));
+    	      	    
+    	    document.add(new StringField("created",created,Field.Store.YES));
+    	    document.add(new StringNoIndexedField("imagelink",imagelink));
+//    	    document.add(new StringNoIndexedField("images",images));
+    	    
+    	    document.add(new StringField("loc",section,Field.Store.YES));
+    	    document.add(new StringField("text",title,Field.Store.YES));	    
+    	    document.add(new StringField("quotedText",description,Field.Store.YES));
+    	    
+            
+    	    try {
                 indexWriter.addDocument(document);
             } catch (IOException ex) {
                 System.err.println("Error adding documents to the index. " +  ex.getMessage());
             }
-        }
+    	}
+
     }
 
     public void wrapupAndFinish(){
@@ -152,19 +207,21 @@ public class LuceneIndexWriter {
     	try 
     	{
 
-            //Check the index has been created successfully
-            Directory indexDirectory = FSDirectory.open(new File(outputLuceneIndexPath));
-            IndexReader indexReader = DirectoryReader.open(indexDirectory);
+            Path indexPath = Paths.get(outputLuceneIndexPath);
+        	Directory dir = FSDirectory.open(indexPath);
+            IndexReader indexReader = DirectoryReader.open(dir);
 
             // Search documents
             final IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 
             long startTime = System.currentTimeMillis();
             
+   //         testWriteIndex();
+            
             //******* sample wildcard search ******* //
             
             //create a term to search file name
-            Term term = new Term("description", "*principalmente Pokémon*");
+            Term term = new Term("description", "*Animal Lover/Animals *");
             
             //******* sample wildcard search ******* //
             
@@ -188,13 +245,17 @@ public class LuceneIndexWriter {
             e.printStackTrace();
         }    	
     }
+  
     
-    public static void main(String[] args)
+    
+    
+    
+    public static void main(String[] args) throws IOException
     {
     	//Folder to create index files
     	String outputLuceneIndexPath = "/Users/jebaraj/IndexOutputJSON/";
     	//Folder containing input JSON files
-        String inputJsonFilePath = "/Users/jebaraj/InputJSON/";
+        String inputJsonFilePath = "/Users/jebaraj/InputJSON1/";
         
         //Index folder Clean up before commencing the process
         File outputLuceneIndexFolder = new File(outputLuceneIndexPath);
@@ -220,6 +281,7 @@ public class LuceneIndexWriter {
           }
         } 
 
+        
         //End time of Index creation        
         long endTime = System.currentTimeMillis(); 
  
